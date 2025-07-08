@@ -1,0 +1,11 @@
+{
+  "id": 1,
+  "name": "saikumar",
+  "subjects": [
+    "sscielce",
+    "computers"
+  ],
+  "joiningDate": "2010-09-21",
+  "fees": 3000.0,
+  "course": "commerce"
+}
