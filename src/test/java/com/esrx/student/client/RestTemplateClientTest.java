@@ -1,8 +1,7 @@
-package com.esrx.student.service;
+package com.esrx.student.client;
 
 import com.esrx.student.ControllerExceptionHandling.InternalServerException;
-import com.esrx.student.ControllerExceptionHandling.InvalidIdException;
-import com.esrx.student.ControllerExceptionHandling.InvalidInput;
+import com.esrx.student.ControllerExceptionHandling.CustomStudentException;
 import com.esrx.student.dto.StudentDto;
 import com.esrx.student.dto.StudentInput;
 import org.junit.jupiter.api.Test;
@@ -25,11 +24,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
-class RestTemplateServiceTest {
+class RestTemplateClientTest {
     @Mock
     RestTemplate restTemplate;
     @InjectMocks
-    RestTemplateService restTemplateService;
+    RestTemplateClient restTemplateClient;
 
 //    @BeforeEach
 //    void setUp() {
@@ -42,7 +41,7 @@ class RestTemplateServiceTest {
         ResponseEntity<List<StudentDto>> response=new ResponseEntity<>(mockList, HttpStatus.OK);
         when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(),
                 any(ParameterizedTypeReference.class))).thenReturn(response);
-        List<StudentDto> result = restTemplateService.studentDtoList();
+        List<StudentDto> result = restTemplateClient.studentDtoList();
         assertEquals(mockList.size(),result.size());
     }
 
@@ -52,7 +51,7 @@ class RestTemplateServiceTest {
         StudentDto expectedValue=new StudentDto(1L,"saikumar",List.of("science,commerce"),LocalDate.of(2021,1,1),2300,"commerce");
         ResponseEntity<StudentDto> response=new ResponseEntity<>(expectedValue,HttpStatus.OK);
         when(restTemplate.exchange(anyString(),eq(HttpMethod.GET),isNull(),eq(StudentDto.class))).thenReturn(response);
-        StudentDto output=restTemplateService.getStudentById(input);
+        StudentDto output= restTemplateClient.getStudentById(input);
         assertEquals(expectedValue.getId(),output.getId());
     }
 
@@ -61,14 +60,14 @@ class RestTemplateServiceTest {
         when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(), eq(StudentDto.class)))
                 .thenThrow(HttpClientErrorException.BadRequest.class);
 
-        assertThrows(InvalidIdException.class, () -> restTemplateService.getStudentById(999L));
+        assertThrows(CustomStudentException.class, () -> restTemplateClient.getStudentById(999L));
     }
 
     @Test
     public void testGetStudentById_serviceDown() {
         when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(), eq(StudentDto.class)))
                 .thenThrow(ResourceAccessException.class);
-        assertThrows(InternalServerException.class, () -> restTemplateService.getStudentById(1L));
+        assertThrows(InternalServerException.class, () -> restTemplateClient.getStudentById(1L));
     }
 
     @Test
@@ -77,7 +76,7 @@ class RestTemplateServiceTest {
         StudentDto expectedValue=new StudentDto(1L,"saikumar",List.of("science,commerce"),LocalDate.of(2021,1,1),2300,"commerce");
         ResponseEntity<StudentDto> response=new ResponseEntity<>(expectedValue,HttpStatus.OK);
         when(restTemplate.exchange(anyString(),eq(HttpMethod.POST),any(HttpEntity.class),eq(StudentDto.class))).thenReturn(response);
-        StudentDto output=restTemplateService.getStudentByIdAndName(studentInput);
+        StudentDto output= restTemplateClient.getStudentByIdAndName(studentInput);
         assertEquals(expectedValue.getName(),output.getName());
     }
     @Test
@@ -85,7 +84,7 @@ class RestTemplateServiceTest {
         StudentInput studentInput=new StudentInput(19L,"saikumar");
         when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(StudentDto.class)))
                 .thenThrow(HttpClientErrorException.BadRequest.class);
-        assertThrows(InvalidInput.class, () -> restTemplateService.getStudentByIdAndName(studentInput));
+        assertThrows(CustomStudentException.class, () -> restTemplateClient.getStudentByIdAndName(studentInput));
     }
 
     @Test
@@ -93,7 +92,7 @@ class RestTemplateServiceTest {
         StudentInput studentInput=new StudentInput(19L,"saikumar");
         when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(StudentDto.class)))
                 .thenThrow(HttpServerErrorException.InternalServerError.class);
-        assertThrows(InternalServerException.class, () -> restTemplateService.getStudentByIdAndName(studentInput));
+        assertThrows(InternalServerException.class, () -> restTemplateClient.getStudentByIdAndName(studentInput));
     }
 
 }

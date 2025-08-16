@@ -2,11 +2,13 @@ package com.esrx.student.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
+@EnableAspectJAutoProxy
 public class StudentConfiguration {
     @Bean
     public RestTemplate restTemplate(){

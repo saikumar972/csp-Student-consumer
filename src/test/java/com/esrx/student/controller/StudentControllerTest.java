@@ -2,7 +2,7 @@ package com.esrx.student.controller;
 
 import com.esrx.student.dto.StudentDto;
 import com.esrx.student.dto.StudentInput;
-import com.esrx.student.service.RestTemplateService;
+import com.esrx.student.client.RestTemplateClient;
 import com.esrx.student.utiliy.JsonConverter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,26 +10,23 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.io.IOException;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(StudentConsumerController.class)
+@WebMvcTest(StudentRestTemplateController.class)
 public class StudentControllerTest {
     @Autowired
-    StudentConsumerController studentConsumerController;
+    StudentRestTemplateController studentRestTemplateController;
     @MockitoBean
-    RestTemplateService service;
+    RestTemplateClient service;
     @Autowired
     MockMvc mockMvc;
     private ObjectMapper objectMapper=new ObjectMapper();

@@ -12,11 +12,18 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/student")
-public class StudentConsumerController {
+public class StudentRestTemplateController {
     @Autowired
     RestTemplateService restTemplateService;
     @Value("${student.name}")
     String name;
+
+    @PostMapping("/add")
+    public ResponseEntity<StudentDto> addStudent(@RequestBody StudentDto studentDto){
+        StudentDto studentDto1=restTemplateService.createStudent(studentDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(studentDto1);
+    }
+
     @GetMapping("/all")
     public ResponseEntity<List<StudentDto>> getStudents(){
         List<StudentDto> studentDtoList= restTemplateService.studentDtoList();

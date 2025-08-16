@@ -3,13 +3,11 @@ package com.esrx.student.controller;
 import com.esrx.student.dto.StudentDto;
 import com.esrx.student.dto.StudentInput;
 import com.esrx.student.service.RestClientService;
-import com.esrx.student.service.RestTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -19,6 +17,11 @@ public class StudentRestClientController {
     RestClientService restClientService;
     @Value("${student.name}")
     String name;
+    @PostMapping("/add")
+    public ResponseEntity<StudentDto> addStudent(@RequestBody StudentDto studentDto){
+        StudentDto student= restClientService.addStudent(studentDto);
+        return ResponseEntity.status(HttpStatus.OK).body(student);
+    }
     @GetMapping("/all")
     public ResponseEntity<List<StudentDto>> getStudents(){
         List<StudentDto> studentDtoList= restClientService.studentDtoList();
@@ -34,5 +37,10 @@ public class StudentRestClientController {
     public ResponseEntity<StudentDto> getStudentByIdAndName(@RequestBody StudentInput studentInput){
         StudentDto studentDto= restClientService.getStudentByIdAndName(studentInput);
         return ResponseEntity.status(HttpStatus.OK).body(studentDto);
+    }
+    @DeleteMapping("/id/{id}")
+    public ResponseEntity<String> deleteStudentById(@PathVariable int id){
+        String status= restClientService.deleteStudentById(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(status);
     }
 }
