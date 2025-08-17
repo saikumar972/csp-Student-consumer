@@ -3,6 +3,7 @@ package com.esrx.student.controller;
 import com.esrx.student.dto.StudentDto;
 import com.esrx.student.dto.StudentInput;
 import com.esrx.student.service.RestClientService;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -29,8 +30,9 @@ public class StudentRestClientController {
         return ResponseEntity.status(HttpStatus.OK).body(studentDtoList);
     }
     @GetMapping("/id/{id}")
+    @SneakyThrows
     public ResponseEntity<StudentDto> getStudentById(@PathVariable Long id){
-        StudentDto studentDto= restClientService.getStudentById(id);
+        StudentDto studentDto= restClientService.getStudentById(id).get();
         return ResponseEntity.status(HttpStatus.OK).body(studentDto);
     }
     @PostMapping("/fetch")
@@ -42,5 +44,11 @@ public class StudentRestClientController {
     public ResponseEntity<String> deleteStudentById(@PathVariable int id){
         String status= restClientService.deleteStudentById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(status);
+    }
+
+    @GetMapping("/name/{name}")
+    public ResponseEntity<StudentDto> getStudentByName(@PathVariable String name){
+        StudentDto studentDto= restClientService.getStudentByName(name);
+        return ResponseEntity.status(HttpStatus.OK).body(studentDto);
     }
 }

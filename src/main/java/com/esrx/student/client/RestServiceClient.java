@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Service
-public class RestClient {
+public class RestServiceClient {
     @Value("${student.endpoint}")
     private String studentUrl;
     private org.springframework.web.client.RestClient restClient;
@@ -57,9 +57,6 @@ public class RestClient {
                 .get()
                 .uri("/id/{id}",id)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError,((request, response) ->{
-                    throw new CustomStudentException(new String(response.getBody().readAllBytes(),StandardCharsets.UTF_8));
-                }))
                 .body(StudentDto.class);
     }
 
@@ -95,6 +92,20 @@ public class RestClient {
                 .body(String.class);
         return "deleted successfully";
     }
+
+    public StudentDto getStudentByName(String name) {
+        return restClient
+                .get()
+                .uri("/name/{name}",name)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,((request, response) ->
+                {
+                    throw new CustomStudentException(new String(response.getBody().readAllBytes(),StandardCharsets.UTF_8));
+
+                }))
+                .body(StudentDto.class);
+    }
+
 
 }
 

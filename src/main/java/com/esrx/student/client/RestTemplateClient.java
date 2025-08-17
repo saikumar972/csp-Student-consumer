@@ -54,7 +54,6 @@ public class RestTemplateClient {
     }
 
     public StudentDto getStudentById(Long id){
-        try{
             ResponseEntity<StudentDto> studentResponse=restTemplate.exchange(
                     studentUrl+"/id/"+id,
                     HttpMethod.GET,
@@ -62,11 +61,6 @@ public class RestTemplateClient {
                     StudentDto.class
             );
             return studentResponse.getBody();
-        }catch (HttpClientErrorException errorException){
-                throw new CustomStudentException(errorException.getResponseBodyAsString());
-        }catch (Exception e) {
-            throw new InternalServerException("Unable to reach student service: " + e.getMessage());
-        }
     }
 
     public StudentDto getStudentByIdAndName(StudentInput studentInput){
@@ -81,6 +75,22 @@ public class RestTemplateClient {
             return studentResponse.getBody();
         }catch (HttpClientErrorException errorException){
                 throw new CustomStudentException(errorException.getResponseBodyAsString());
+        }catch (Exception e){
+            throw new InternalServerException("Backend returned 500: " + e.getMessage());
+        }
+    }
+
+    public StudentDto getStudentByName(String name){
+        try{
+            ResponseEntity<StudentDto> studentResponse=restTemplate.exchange(
+                    studentUrl+"/name/"+name,
+                    HttpMethod.GET,
+                    null,
+                    StudentDto.class
+            );
+            return studentResponse.getBody();
+        }catch (HttpClientErrorException errorException){
+            throw new CustomStudentException(errorException.getResponseBodyAsString());
         }catch (Exception e){
             throw new InternalServerException("Backend returned 500: " + e.getMessage());
         }

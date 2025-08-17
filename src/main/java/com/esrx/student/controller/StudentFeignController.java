@@ -4,6 +4,7 @@ import com.esrx.student.dto.StudentDto;
 import com.esrx.student.dto.StudentInput;
 import com.esrx.student.service.FeignClientServices;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -27,7 +28,14 @@ public class StudentFeignController {
 
     @GetMapping("/id/{id}")
     public ResponseEntity<StudentDto> getStudentDetailsById(@PathVariable Long id){
-        return feignClientServices.getStudentDetailsById(id);
+        try { Thread.sleep(5000); } catch (InterruptedException ignored) {}
+        StudentDto studentDto=feignClientServices.getStudentDetailsById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(studentDto);
+    }
+    //bulkhead
+    @GetMapping("/test")
+    public void bulkHeadTest(){
+        feignClientServices.test();
     }
 
     @GetMapping("/all")
@@ -43,6 +51,12 @@ public class StudentFeignController {
     @PostMapping("/fetch")
     public ResponseEntity<StudentDto> getStudentDetailsByIdAndName(@RequestBody StudentInput studentInput){
         return feignClientServices.getStudentDetailsByIdAndName(studentInput);
+    }
+
+    @GetMapping("/name/{name}")
+    public ResponseEntity<StudentDto> getStudentByName(@PathVariable String name){
+        StudentDto studentDto=feignClientServices.getStudentByName(name);
+        return ResponseEntity.status(HttpStatus.OK).body(studentDto);
     }
 
 }

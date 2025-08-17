@@ -25,4 +25,7 @@ public interface FeignClient {
 
     @PostMapping("/fetch")
     ResponseEntity<StudentDto> getStudentDetailsByIdAndName(@RequestBody StudentInput studentInput);
+
+    @GetMapping("/name/{name}")
+    ResponseEntity<StudentDto> getStudentByName(@PathVariable String name);
 }

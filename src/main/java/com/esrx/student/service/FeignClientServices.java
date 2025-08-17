@@ -3,17 +3,27 @@ package com.esrx.student.service;
 import com.esrx.student.client.FeignClient;
 import com.esrx.student.dto.StudentDto;
 import com.esrx.student.dto.StudentInput;
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 public class FeignClientServices {
     @Autowired
     FeignClient feignClient;
+
+    ExecutorService executorService= Executors.newFixedThreadPool(4);
 
     public ResponseEntity<StudentDto> addStudent(StudentDto studentDto){
         return feignClient.addStudent(studentDto);
@@ -24,21 +34,56 @@ public class FeignClientServices {
         return feignClient.updateStudentDetails(studentDto);
     }
 
-    public ResponseEntity<StudentDto> getStudentDetailsById(@PathVariable Long id){
-        return feignClient.getStudentDetailsById(id);
-    }
-
     public ResponseEntity<List<StudentDto>> studentList(){
         return feignClient.studentList();
     }
 
 
-    public ResponseEntity<String> deleteStudentById(@PathVariable Long id){
+    public ResponseEntity<String> deleteStudentById(Long id){
         return feignClient.deleteStudentById(id);
     }
 
 
     public ResponseEntity<StudentDto> getStudentDetailsByIdAndName(StudentInput studentInput){
         return feignClient.getStudentDetailsByIdAndName(studentInput);
+    }
+
+    @Bulkhead(name = "studentBulkHead",type = Bulkhead.Type.SEMAPHORE,fallbackMethod = "failed")
+    public StudentDto getStudentDetailsById(Long id){
+        return feignClient.getStudentDetailsById(id).getBody();
+    }
+
+    public StudentDto failed(Long id,Throwable t){
+        StudentDto fallBackStudent=new StudentDto();
+        fallBackStudent.setId(id);
+        fallBackStudent.setName("fallback");
+        fallBackStudent.setFees(100);
+        System.out.println("FallBack invoked exception message is "+t.getMessage());
+        return fallBackStudent;
+    }
+
+    public void test(){
+        ExecutorService executor = Executors.newFixedThreadPool(4);
+        for (int i = 0; i < 4; i++) {
+            executor.submit(() -> {
+                StudentDto dto = getStudentDetailsById(1L);
+                System.out.println(dto.getName());
+            });
+        }
+    }
+
+    //circuit breaker
+    @CircuitBreaker(name = "studentService", fallbackMethod = "failedName")
+    public StudentDto getStudentByName(String name){
+        return feignClient.getStudentByName(name).getBody();
+    }
+
+    public StudentDto failedName(String name,Throwable t){
+        StudentDto fallBackStudent=new StudentDto();
+        fallBackStudent.setId(0L);
+        fallBackStudent.setName(name);
+        fallBackStudent.setFees(100);
+        System.out.println("FallBack invoked exception message is "+t.getMessage());
+        return fallBackStudent;
     }
 }

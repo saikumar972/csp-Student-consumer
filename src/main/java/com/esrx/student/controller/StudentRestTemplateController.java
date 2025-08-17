@@ -35,6 +35,11 @@ public class StudentRestTemplateController {
         StudentDto studentDto= restTemplateService.getStudentById(id);
         return ResponseEntity.status(HttpStatus.OK).body(studentDto);
     }
+    @GetMapping("/name/{name}")
+    public ResponseEntity<StudentDto> getStudentById(@PathVariable String name){
+        StudentDto studentDto= restTemplateService.getStudentByName(name);
+        return ResponseEntity.status(HttpStatus.OK).body(studentDto);
+    }
     @PostMapping("/fetch")
     public ResponseEntity<StudentDto> getStudentByIdAndName(@RequestBody StudentInput studentInput){
         StudentDto studentDto= restTemplateService.getStudentByIdAndName(studentInput);
