@@ -6,7 +6,6 @@ import com.esrx.student.dto.StudentInput;
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -52,7 +51,7 @@ public class FeignClientServices {
         StudentDto fallBackStudent=new StudentDto();
         fallBackStudent.setId(0L);
         fallBackStudent.setName(name);
-        fallBackStudent.setFees(100);
+        fallBackStudent.setFees(0);
         System.out.println("FallBack invoked exception message is "+t.getMessage());
         return fallBackStudent;
     }

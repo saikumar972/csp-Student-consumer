@@ -1,7 +1,7 @@
 package com.esrx.student.service;
 
 import com.esrx.student.ControllerExceptionHandling.CustomStudentException;
-import com.esrx.student.client.RestServiceClient;
+import com.esrx.student.client.RestClientClient;
 import com.esrx.student.dto.StudentDto;
 import com.esrx.student.dto.StudentInput;
 import io.github.resilience4j.bulkhead.BulkheadFullException;
@@ -18,28 +18,28 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class RestClientService {
    @Autowired
-   RestServiceClient restServiceClient;
+   RestClientClient restClientClient;
 
     public StudentDto addStudent(StudentDto studentDto){
-        return restServiceClient.addStudent(studentDto);
+        return restClientClient.addStudent(studentDto);
     }
 
     public List<StudentDto> studentDtoList(){
-        return restServiceClient.studentDtoList();
+        return restClientClient.studentDtoList();
     }
 
     public StudentDto getStudentByIdAndName(StudentInput studentInput) {
-       return restServiceClient.getStudentByIdAndName(studentInput);
+       return restClientClient.getStudentByIdAndName(studentInput);
     }
 
     public String deleteStudentById(int id){
-        return restServiceClient.deleteStudentById(id);
+        return restClientClient.deleteStudentById(id);
     }
 
     //ThreadPool BulkHead testing
     @Bulkhead(name = "threadPoolBulkHeadTest",type = Bulkhead.Type.THREADPOOL,fallbackMethod = "failed")
     public CompletableFuture<StudentDto> getStudentById(Long id) {
-        return CompletableFuture.completedFuture(restServiceClient.getStudentById(id));
+        return CompletableFuture.completedFuture(restClientClient.getStudentById(id));
     }
 
     public CompletableFuture<StudentDto> failed(Long id,Throwable t){
@@ -71,7 +71,7 @@ public class RestClientService {
     //RateLimiter testing
     @RateLimiter(name="studentName",fallbackMethod = "failedRate")
     public StudentDto getStudentByName(String name){
-        return restServiceClient.getStudentByName(name);
+        return restClientClient.getStudentByName(name);
     }
 
     public StudentDto failedRate(String name,Throwable t){

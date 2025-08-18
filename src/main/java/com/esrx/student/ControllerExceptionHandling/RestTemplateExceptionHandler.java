@@ -29,9 +29,11 @@ public class RestTemplateExceptionHandler {
 
     //rate limiter
     @ExceptionHandler(RequestNotPermitted.class)
-    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
-    public String requestNotPermitted(RequestNotPermitted exception){
-        return exception.getMessage();
+    public ResponseEntity<String> requestNotPermitted(RequestNotPermitted exception) {
+        System.out.println("Exception invoked because of too many requests coming");
+        return ResponseEntity
+                .status(HttpStatus.TOO_MANY_REQUESTS)
+                .body("Request got denied because of " + exception.getMessage());
     }
 
 }

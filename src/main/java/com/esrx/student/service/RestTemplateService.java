@@ -35,25 +35,23 @@ public class RestTemplateService {
         return restTemplateClient.getStudentById(id);
     }
 
-    public StudentDto failed(Long id,Throwable t){
-        //we can omit the throwable coz we handle the exception through try/catch in client call
-        //And RequestNotPermit can be handled in the RestControllerAdvice
-        if (t instanceof RequestNotPermitted) {
-            // Rate limiter was exceeded
-            System.out.println("Rate limiter triggered for Student ID: " + id);
-            StudentDto fallbackDto = new StudentDto();
-            fallbackDto.setId(id);
-            fallbackDto.setName("Fallback Student");
-            return fallbackDto;
-        }
+    public StudentDto failed(Long id,Throwable t) {
+       //if we use retry we have to handle exception here only not the try catch block in client call
+        //if the too many req triggered the controller goes to fallback and executed the default student which written below
+        //for server side errors also fallback method only triggered and we cannot write like ignore the exception in property file
+        //so always handle exception in fallback method only
+        System.out.println("fallback method executed");
         if(t instanceof HttpClientErrorException exception){
-            System.out.println("executed the custom exception");
             throw new CustomStudentException(exception.getResponseBodyAsString());
+        }else if(t instanceof RequestNotPermitted ex){
+            throw ex;
         }
-        else {
-            // Rethrow other exceptions (like HTTP 400 errors)
-            if (t instanceof RuntimeException exception) throw exception;
-            throw new RuntimeException(t);
+        else{
+            StudentDto fallBackStudent=new StudentDto();
+            fallBackStudent.setName("fallback");
+            fallBackStudent.setId(id);
+            fallBackStudent.setFees(0);
+            return fallBackStudent;
         }
     }
 
@@ -65,7 +63,7 @@ public class RestTemplateService {
     }
 
     //We ignore the HttpClientExceptions and CustomStudentExceptions in the application properties
-    public StudentDto studentRetry(String name,Throwable t){
+    public StudentDto studentRetry(String name, Throwable t){
         System.out.println(t.getMessage());
         System.out.println("fallback executed");
         StudentDto fallBackStudent=new StudentDto();

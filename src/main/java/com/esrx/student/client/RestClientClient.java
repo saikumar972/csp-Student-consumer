@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Service
-public class RestServiceClient {
+public class RestClientClient {
     @Value("${student.endpoint}")
     private String studentUrl;
     private org.springframework.web.client.RestClient restClient;
@@ -49,7 +49,7 @@ public class RestServiceClient {
         return restClient.get()
                 .uri("/all")
                 .retrieve()
-                .body(new ParameterizedTypeReference<List<StudentDto>>() {});
+                .body(new ParameterizedTypeReference<>() {});
     }
 
     public StudentDto getStudentByIdAndName(StudentInput studentInput) {
@@ -60,7 +60,7 @@ public class RestServiceClient {
                 .contentType(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(
-                        status -> status.is4xxClientError(),
+                        HttpStatusCode::is4xxClientError,
                         (request, response) -> {
                             System.out.println(request.getURI());
                             String errorBody = new String(response.getBody().readAllBytes(), StandardCharsets.UTF_8);
@@ -103,7 +103,6 @@ public class RestServiceClient {
                 .onStatus(HttpStatusCode::is4xxClientError,((request, response) ->
                 {
                     throw new CustomStudentException(new String(response.getBody().readAllBytes(),StandardCharsets.UTF_8));
-
                 }))
                 .body(StudentDto.class);
     }
