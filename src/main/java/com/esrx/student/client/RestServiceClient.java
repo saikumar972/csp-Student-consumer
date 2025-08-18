@@ -52,14 +52,6 @@ public class RestServiceClient {
                 .body(new ParameterizedTypeReference<List<StudentDto>>() {});
     }
 
-    public StudentDto getStudentById(Long id) {
-        return restClient
-                .get()
-                .uri("/id/{id}",id)
-                .retrieve()
-                .body(StudentDto.class);
-    }
-
     public StudentDto getStudentByIdAndName(StudentInput studentInput) {
         return restClient
                 .post()
@@ -93,6 +85,16 @@ public class RestServiceClient {
         return "deleted successfully";
     }
 
+    //ThreadPool bulkhead
+    public StudentDto getStudentById(Long id) {
+        return restClient
+                .get()
+                .uri("/id/{id}",id)
+                .retrieve()
+                .body(StudentDto.class);
+    }
+
+    //RateLimiter testing
     public StudentDto getStudentByName(String name) {
         return restClient
                 .get()

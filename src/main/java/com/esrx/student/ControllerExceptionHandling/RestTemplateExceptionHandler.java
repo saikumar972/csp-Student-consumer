@@ -27,12 +27,6 @@ public class RestTemplateExceptionHandler {
        //return ResponseEntity.status(HttpStatus.NOT_FOUND).body(studentErrorDto);
     }
 
-    @ExceptionHandler(InternalServerException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public String internalServerErrorMethod(InternalServerException exception){
-        return exception.getMessage();
-    }
-
     //rate limiter
     @ExceptionHandler(RequestNotPermitted.class)
     @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)

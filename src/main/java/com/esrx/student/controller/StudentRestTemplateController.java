@@ -30,19 +30,24 @@ public class StudentRestTemplateController {
         System.out.println(name);
         return ResponseEntity.status(HttpStatus.OK).body(studentDtoList);
     }
+
+    @PostMapping("/fetch")
+    public ResponseEntity<StudentDto> getStudentByIdAndName(@RequestBody StudentInput studentInput){
+        StudentDto studentDto= restTemplateService.getStudentByIdAndName(studentInput);
+        return ResponseEntity.status(HttpStatus.OK).body(studentDto);
+    }
+
+    //Rate limiter
     @GetMapping("/id/{id}")
     public ResponseEntity<StudentDto> getStudentById(@PathVariable Long id){
         StudentDto studentDto= restTemplateService.getStudentById(id);
         return ResponseEntity.status(HttpStatus.OK).body(studentDto);
     }
+
+    //Retry
     @GetMapping("/name/{name}")
     public ResponseEntity<StudentDto> getStudentById(@PathVariable String name){
         StudentDto studentDto= restTemplateService.getStudentByName(name);
-        return ResponseEntity.status(HttpStatus.OK).body(studentDto);
-    }
-    @PostMapping("/fetch")
-    public ResponseEntity<StudentDto> getStudentByIdAndName(@RequestBody StudentInput studentInput){
-        StudentDto studentDto= restTemplateService.getStudentByIdAndName(studentInput);
         return ResponseEntity.status(HttpStatus.OK).body(studentDto);
     }
 }

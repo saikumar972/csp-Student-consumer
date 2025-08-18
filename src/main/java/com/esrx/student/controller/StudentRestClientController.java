@@ -29,12 +29,7 @@ public class StudentRestClientController {
         System.out.println(name);
         return ResponseEntity.status(HttpStatus.OK).body(studentDtoList);
     }
-    @GetMapping("/id/{id}")
-    @SneakyThrows
-    public ResponseEntity<StudentDto> getStudentById(@PathVariable Long id){
-        StudentDto studentDto= restClientService.getStudentById(id).get();
-        return ResponseEntity.status(HttpStatus.OK).body(studentDto);
-    }
+
     @PostMapping("/fetch")
     public ResponseEntity<StudentDto> getStudentByIdAndName(@RequestBody StudentInput studentInput){
         StudentDto studentDto= restClientService.getStudentByIdAndName(studentInput);
@@ -46,6 +41,15 @@ public class StudentRestClientController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(status);
     }
 
+    //ThreadPoolBulk head testing
+    @GetMapping("/id/{id}")
+    @SneakyThrows
+    public ResponseEntity<StudentDto> getStudentById(@PathVariable Long id){
+        StudentDto studentDto= restClientService.getStudentById(id).get();
+        return ResponseEntity.status(HttpStatus.OK).body(studentDto);
+    }
+
+    //RateLimiter testing
     @GetMapping("/name/{name}")
     public ResponseEntity<StudentDto> getStudentByName(@PathVariable String name){
         StudentDto studentDto= restClientService.getStudentByName(name);

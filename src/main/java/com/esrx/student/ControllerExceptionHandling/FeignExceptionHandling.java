@@ -19,17 +19,17 @@ public class FeignExceptionHandling {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(studentErrorDto);
     }
 
+    //we can write all the feign exception like below
     @ExceptionHandler(FeignException.class)
     @SneakyThrows
     public ResponseEntity<?> handlingAllExceptions(FeignException exception){
         ObjectMapper objectMapper=new ObjectMapper();
         StudentErrorDto studentErrorDto=objectMapper.readValue(exception.contentUTF8(),StudentErrorDto.class);
         return switch (exception.status()){
-            case 400-> ResponseEntity.status(HttpStatus.BAD_REQUEST).body(studentErrorDto);
             case 404-> ResponseEntity.status(HttpStatus.NOT_FOUND).body(studentErrorDto);
             case 500-> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(studentErrorDto);
             case 502-> ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(studentErrorDto);
-            default -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exception.contentUTF8());
+            default -> ResponseEntity.status(exception.status()).body(exception.contentUTF8());
         };
     }
 }

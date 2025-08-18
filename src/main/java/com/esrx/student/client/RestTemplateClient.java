@@ -1,6 +1,5 @@
 package com.esrx.student.client;
 
-import com.esrx.student.ControllerExceptionHandling.InternalServerException;
 import com.esrx.student.ControllerExceptionHandling.CustomStudentException;
 import com.esrx.student.dto.StudentDto;
 import com.esrx.student.dto.StudentInput;
@@ -39,7 +38,7 @@ public class RestTemplateClient {
         catch (HttpClientErrorException errorException){
             throw new CustomStudentException(errorException.getResponseBodyAsString());
         }catch (Exception e) {
-            throw new InternalServerException("Unable to reach student service: " + e.getMessage());
+            throw new RuntimeException("Unable to reach student service: " + e.getMessage());
         }
     }
 
@@ -51,16 +50,6 @@ public class RestTemplateClient {
                         new ParameterizedTypeReference<List<StudentDto>>(){}
                 );
         return studentResponse.getBody();
-    }
-
-    public StudentDto getStudentById(Long id){
-            ResponseEntity<StudentDto> studentResponse=restTemplate.exchange(
-                    studentUrl+"/id/"+id,
-                    HttpMethod.GET,
-                    null,
-                    StudentDto.class
-            );
-            return studentResponse.getBody();
     }
 
     public StudentDto getStudentByIdAndName(StudentInput studentInput){
@@ -76,10 +65,22 @@ public class RestTemplateClient {
         }catch (HttpClientErrorException errorException){
                 throw new CustomStudentException(errorException.getResponseBodyAsString());
         }catch (Exception e){
-            throw new InternalServerException("Backend returned 500: " + e.getMessage());
+            throw new RuntimeException("Backend returned 500: " + e.getMessage());
         }
     }
 
+    //Rate limiter
+    public StudentDto getStudentById(Long id){
+        ResponseEntity<StudentDto> studentResponse=restTemplate.exchange(
+                studentUrl+"/id/"+id,
+                HttpMethod.GET,
+                null,
+                StudentDto.class
+        );
+        return studentResponse.getBody();
+    }
+
+    //Retry
     public StudentDto getStudentByName(String name){
         try{
             ResponseEntity<StudentDto> studentResponse=restTemplate.exchange(
@@ -92,7 +93,7 @@ public class RestTemplateClient {
         }catch (HttpClientErrorException errorException){
             throw new CustomStudentException(errorException.getResponseBodyAsString());
         }catch (Exception e){
-            throw new InternalServerException("Backend returned 500: " + e.getMessage());
+            throw new RuntimeException("Backend returned 500: " + e.getMessage());
         }
     }
 

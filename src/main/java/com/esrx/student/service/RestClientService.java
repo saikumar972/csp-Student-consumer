@@ -36,6 +36,7 @@ public class RestClientService {
         return restServiceClient.deleteStudentById(id);
     }
 
+    //ThreadPool BulkHead testing
     @Bulkhead(name = "threadPoolBulkHeadTest",type = Bulkhead.Type.THREADPOOL,fallbackMethod = "failed")
     public CompletableFuture<StudentDto> getStudentById(Long id) {
         return CompletableFuture.completedFuture(restServiceClient.getStudentById(id));
@@ -67,6 +68,7 @@ public class RestClientService {
         }
     }
 
+    //RateLimiter testing
     @RateLimiter(name="studentName",fallbackMethod = "failedRate")
     public StudentDto getStudentByName(String name){
         return restServiceClient.getStudentByName(name);

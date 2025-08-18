@@ -7,7 +7,6 @@ import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Fallback;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import com.esrx.student.client.RestTemplateClient;
@@ -30,6 +29,7 @@ public class RestTemplateService {
         return restTemplateClient.getStudentByIdAndName(studentInput);
     }
 
+    //RateLimiter
     @RateLimiter(name = "studentService",fallbackMethod = "failed")
     public StudentDto getStudentById(Long id){
         return restTemplateClient.getStudentById(id);
@@ -37,6 +37,7 @@ public class RestTemplateService {
 
     public StudentDto failed(Long id,Throwable t){
         //we can omit the throwable coz we handle the exception through try/catch in client call
+        //And RequestNotPermit can be handled in the RestControllerAdvice
         if (t instanceof RequestNotPermitted) {
             // Rate limiter was exceeded
             System.out.println("Rate limiter triggered for Student ID: " + id);
@@ -45,7 +46,7 @@ public class RestTemplateService {
             fallbackDto.setName("Fallback Student");
             return fallbackDto;
         }
-        else if(t instanceof HttpClientErrorException exception){
+        if(t instanceof HttpClientErrorException exception){
             System.out.println("executed the custom exception");
             throw new CustomStudentException(exception.getResponseBodyAsString());
         }
@@ -56,12 +57,14 @@ public class RestTemplateService {
         }
     }
 
+    //Retry testing
     @Retry(name = "studentService", fallbackMethod = "studentRetry")
     public StudentDto getStudentByName(String name){
         System.out.println("retried");
         return restTemplateClient.getStudentByName(name);
     }
 
+    //We ignore the HttpClientExceptions and CustomStudentExceptions in the application properties
     public StudentDto studentRetry(String name,Throwable t){
         System.out.println(t.getMessage());
         System.out.println("fallback executed");

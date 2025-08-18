@@ -1,6 +1,5 @@
 package com.esrx.student.client;
 
-import com.esrx.student.ControllerExceptionHandling.InternalServerException;
 import com.esrx.student.ControllerExceptionHandling.CustomStudentException;
 import com.esrx.student.dto.StudentDto;
 import com.esrx.student.dto.StudentInput;
@@ -67,7 +66,7 @@ class RestTemplateClientTest {
     public void testGetStudentById_serviceDown() {
         when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(), eq(StudentDto.class)))
                 .thenThrow(ResourceAccessException.class);
-        assertThrows(InternalServerException.class, () -> restTemplateClient.getStudentById(1L));
+        assertThrows(RuntimeException.class, () -> restTemplateClient.getStudentById(1L));
     }
 
     @Test
@@ -92,7 +91,7 @@ class RestTemplateClientTest {
         StudentInput studentInput=new StudentInput(19L,"saikumar");
         when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(StudentDto.class)))
                 .thenThrow(HttpServerErrorException.InternalServerError.class);
-        assertThrows(InternalServerException.class, () -> restTemplateClient.getStudentByIdAndName(studentInput));
+        assertThrows(RuntimeException.class, () -> restTemplateClient.getStudentByIdAndName(studentInput));
     }
 
 }

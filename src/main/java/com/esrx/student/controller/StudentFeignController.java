@@ -18,45 +18,51 @@ public class StudentFeignController {
 
     @PostMapping("/add")
     public ResponseEntity<StudentDto> addStudent(@RequestBody StudentDto studentDto){
-       return  feignClientServices.addStudent(studentDto);
+       StudentDto student = feignClientServices.addStudent(studentDto);
+       return ResponseEntity.status(HttpStatus.CREATED).body(student);
     }
 
     @PutMapping("/update")
     public ResponseEntity<StudentDto>  updateStudentDetails(@RequestBody StudentDto studentDto){
-        return feignClientServices.updateStudentDetails(studentDto);
+        StudentDto student =  feignClientServices.updateStudentDetails(studentDto);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(student);
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<StudentDto>> studentList(){
+        List<StudentDto> studentDtoList = feignClientServices.studentList();
+        return ResponseEntity.status(HttpStatus.OK).body(studentDtoList);
+    }
+
+    @DeleteMapping("/id/{id}")
+    public ResponseEntity<String> deleteStudentById(@PathVariable Long id){
+        String deleteMessage = feignClientServices.deleteStudentById(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(deleteMessage);
+    }
+
+    @PostMapping("/fetch")
+    public ResponseEntity<StudentDto> getStudentDetailsByIdAndName(@RequestBody StudentInput studentInput){
+        StudentDto student = feignClientServices.getStudentDetailsByIdAndName(studentInput);
+        return ResponseEntity.status(HttpStatus.OK).body(student);
+    }
+
+    //circuit breaker test
+    @GetMapping("/name/{name}")
+    public ResponseEntity<StudentDto> getStudentByName(@PathVariable String name){
+        StudentDto studentDto=feignClientServices.getStudentByName(name);
+        return ResponseEntity.status(HttpStatus.OK).body(studentDto);
+    }
+
+    //bulkhead
     @GetMapping("/id/{id}")
     public ResponseEntity<StudentDto> getStudentDetailsById(@PathVariable Long id){
         try { Thread.sleep(5000); } catch (InterruptedException ignored) {}
         StudentDto studentDto=feignClientServices.getStudentDetailsById(id);
         return ResponseEntity.status(HttpStatus.OK).body(studentDto);
     }
-    //bulkhead
     @GetMapping("/test")
     public void bulkHeadTest(){
         feignClientServices.test();
-    }
-
-    @GetMapping("/all")
-    public ResponseEntity<List<StudentDto>> studentList(){
-        return feignClientServices.studentList();
-    }
-
-    @DeleteMapping("/id/{id}")
-    public ResponseEntity<String> deleteStudentById(@PathVariable Long id){
-        return feignClientServices.deleteStudentById(id);
-    }
-
-    @PostMapping("/fetch")
-    public ResponseEntity<StudentDto> getStudentDetailsByIdAndName(@RequestBody StudentInput studentInput){
-        return feignClientServices.getStudentDetailsByIdAndName(studentInput);
-    }
-
-    @GetMapping("/name/{name}")
-    public ResponseEntity<StudentDto> getStudentByName(@PathVariable String name){
-        StudentDto studentDto=feignClientServices.getStudentByName(name);
-        return ResponseEntity.status(HttpStatus.OK).body(studentDto);
     }
 
 }
