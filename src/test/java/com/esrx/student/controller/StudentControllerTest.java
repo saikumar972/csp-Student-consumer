@@ -2,7 +2,7 @@ package com.esrx.student.controller;
 
 import com.esrx.student.dto.StudentDto;
 import com.esrx.student.dto.StudentInput;
-import com.esrx.student.client.RestTemplateClient;
+import com.esrx.student.service.RestTemplateService;
 import com.esrx.student.utiliy.JsonConverter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,9 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
 import java.util.List;
-
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -26,21 +24,21 @@ public class StudentControllerTest {
     @Autowired
     StudentRestTemplateController studentRestTemplateController;
     @MockitoBean
-    RestTemplateClient service;
+    RestTemplateService service;
     @Autowired
     MockMvc mockMvc;
-    private ObjectMapper objectMapper=new ObjectMapper();
+    private final ObjectMapper objectMapper=new ObjectMapper();
 
     @Test
     public void test_getStudents_success() throws Exception {
         String fileName="studentList.json";
         objectMapper.registerModule(new JavaTimeModule());
         String jsonOutput= JsonConverter.jsonToString(fileName);
-        List<StudentDto> studentList=objectMapper.readValue(jsonOutput, new TypeReference<List<StudentDto>>() {});
+        List<StudentDto> studentList=objectMapper.readValue(jsonOutput, new TypeReference<>() {});
         when(service.studentDtoList()).thenReturn(studentList);
         mockMvc.perform(MockMvcRequestBuilders.get("/student/all"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("saikumar"));
+                .andExpect(jsonPath("$[0].name").value("saiKumar"));
     }
 
     @Test

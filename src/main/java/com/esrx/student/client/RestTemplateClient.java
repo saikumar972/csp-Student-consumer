@@ -71,12 +71,18 @@ public class RestTemplateClient {
 
     //Rate limiter
     public StudentDto getStudentById(Long id) {
-        return restTemplate.exchange(
-                studentUrl + "/id/" + id,
-                HttpMethod.GET,
-                null,
-                StudentDto.class
-        ).getBody();
+        try{
+            return restTemplate.exchange(
+                    studentUrl + "/id/" + id,
+                    HttpMethod.GET,
+                    null,
+                    StudentDto.class
+            ).getBody();
+        }catch (HttpClientErrorException errorException) {
+            throw new CustomStudentException(errorException.getResponseBodyAsString());
+        } catch (Exception e) {
+            throw new RuntimeException("Backend returned 500: " + e.getMessage());
+        }
     }
 
     //Retry

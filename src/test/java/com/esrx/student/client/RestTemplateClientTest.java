@@ -17,6 +17,8 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,7 +38,7 @@ class RestTemplateClientTest {
 
     @Test
     public void testStudentDtoList_success(){
-        List<StudentDto> mockList=List.of(new StudentDto(1L,"saikumar",List.of("science,commerce"),LocalDate.of(2021,1,1),2300,"commerce"),new StudentDto(2L,"saikumar",List.of("science,commerce"),LocalDate.of(2021,1,1),2300,"commerce"));
+        List<StudentDto> mockList=List.of(new StudentDto(1L,"saiKumar",List.of("science,commerce"),LocalDate.of(2021,1,1),2300,"commerce"),new StudentDto(2L,"nanda",List.of("science,commerce"),LocalDate.of(2021,1,1),2300,"commerce"));
         ResponseEntity<List<StudentDto>> response=new ResponseEntity<>(mockList, HttpStatus.OK);
         when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(),
                 any(ParameterizedTypeReference.class))).thenReturn(response);
@@ -56,9 +58,16 @@ class RestTemplateClientTest {
 
     @Test
     public void testGetStudentById_invalidId() {
+        String response = "Bad Request";
+        HttpClientErrorException exception = new HttpClientErrorException(
+                HttpStatus.BAD_REQUEST,                   // status code
+                "Bad Request",                            // status text
+                null,                                     // headers
+                response.getBytes(StandardCharsets.UTF_8),// body as byte array
+                StandardCharsets.UTF_8                    // charset
+        );
         when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(), eq(StudentDto.class)))
-                .thenThrow(HttpClientErrorException.BadRequest.class);
-
+                .thenThrow(exception);
         assertThrows(CustomStudentException.class, () -> restTemplateClient.getStudentById(999L));
     }
 
@@ -71,8 +80,8 @@ class RestTemplateClientTest {
 
     @Test
     public void testGetStudentByNameAndId_success(){
-        StudentInput studentInput=new StudentInput(1L,"saikumar");
-        StudentDto expectedValue=new StudentDto(1L,"saikumar",List.of("science,commerce"),LocalDate.of(2021,1,1),2300,"commerce");
+        StudentInput studentInput=new StudentInput(1L,"saiKumar");
+        StudentDto expectedValue=new StudentDto(1L,"saiKumar",List.of("science,commerce"),LocalDate.of(2021,1,1),2300,"commerce");
         ResponseEntity<StudentDto> response=new ResponseEntity<>(expectedValue,HttpStatus.OK);
         when(restTemplate.exchange(anyString(),eq(HttpMethod.POST),any(HttpEntity.class),eq(StudentDto.class))).thenReturn(response);
         StudentDto output= restTemplateClient.getStudentByIdAndName(studentInput);
@@ -80,15 +89,22 @@ class RestTemplateClientTest {
     }
     @Test
     public void testGetStudentByIdAndName_invalidInput() {
-        StudentInput studentInput=new StudentInput(19L,"saikumar");
+        StudentInput studentInput=new StudentInput(19L,"saiKumar");
+        HttpClientErrorException httpClientErrorException=new HttpClientErrorException(
+                HttpStatus.BAD_REQUEST,
+                "Bad request",
+                null,
+                studentInput.toString().getBytes(StandardCharsets.UTF_8),
+                StandardCharsets.UTF_8
+        );
         when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(StudentDto.class)))
-                .thenThrow(HttpClientErrorException.BadRequest.class);
+                .thenThrow(httpClientErrorException);
         assertThrows(CustomStudentException.class, () -> restTemplateClient.getStudentByIdAndName(studentInput));
     }
 
     @Test
     public void testGetStudentByIdAndName_serverError() {
-        StudentInput studentInput=new StudentInput(19L,"saikumar");
+        StudentInput studentInput=new StudentInput(19L,"saiKumar");
         when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(StudentDto.class)))
                 .thenThrow(HttpServerErrorException.InternalServerError.class);
         assertThrows(RuntimeException.class, () -> restTemplateClient.getStudentByIdAndName(studentInput));
