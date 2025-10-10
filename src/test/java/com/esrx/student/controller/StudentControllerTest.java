@@ -2,6 +2,7 @@ package com.esrx.student.controller;
 
 import com.esrx.student.dto.StudentDto;
 import com.esrx.student.dto.StudentInput;
+import com.esrx.student.resilience.RetryClient;
 import com.esrx.student.service.RestTemplateService;
 import com.esrx.student.utiliy.JsonConverter;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -25,6 +26,8 @@ public class StudentControllerTest {
     StudentRestTemplateController studentRestTemplateController;
     @MockitoBean
     RestTemplateService service;
+    @MockitoBean
+    RetryClient retryClient;
     @Autowired
     MockMvc mockMvc;
     private final ObjectMapper objectMapper=new ObjectMapper();

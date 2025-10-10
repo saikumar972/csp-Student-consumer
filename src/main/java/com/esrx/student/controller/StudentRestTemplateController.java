@@ -2,6 +2,7 @@ package com.esrx.student.controller;
 
 import com.esrx.student.dto.StudentDto;
 import com.esrx.student.dto.StudentInput;
+import com.esrx.student.resilience.RetryClient;
 import com.esrx.student.service.RestTemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,8 @@ public class StudentRestTemplateController {
     RestTemplateService restTemplateService;
     @Value("${student.name}")
     String name;
+    @Autowired
+    RetryClient retryClient;
 
     @PostMapping("/add")
     public ResponseEntity<StudentDto> addStudent(@RequestBody StudentDto studentDto){
@@ -46,8 +49,15 @@ public class StudentRestTemplateController {
 
     //Retry
     @GetMapping("/name/{name}")
-    public ResponseEntity<StudentDto> getStudentById(@PathVariable String name){
+    public ResponseEntity<StudentDto> getStudentByName(@PathVariable String name){
         StudentDto studentDto= restTemplateService.getStudentByName(name);
+        return ResponseEntity.status(HttpStatus.OK).body(studentDto);
+    }
+
+    //Retry
+    @GetMapping("/name/retry/{name}")
+    public ResponseEntity<StudentDto> getStudentByNameRetry(@PathVariable String name){
+        StudentDto studentDto= retryClient.getStudentByNameRetry(name);
         return ResponseEntity.status(HttpStatus.OK).body(studentDto);
     }
 }

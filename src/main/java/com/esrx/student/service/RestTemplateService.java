@@ -14,40 +14,39 @@ import org.springframework.web.client.HttpClientErrorException;
 
 @Service
 public class RestTemplateService {
-  @Autowired
-  RestTemplateClient restTemplateClient;
+    @Autowired
+    RestTemplateClient restTemplateClient;
 
-    public StudentDto createStudent(StudentDto studentDto){
+    public StudentDto createStudent(StudentDto studentDto) {
         return restTemplateClient.createStudent(studentDto);
     }
 
-    public List<StudentDto> studentDtoList(){
+    public List<StudentDto> studentDtoList() {
         return restTemplateClient.studentDtoList();
     }
 
-    public StudentDto getStudentByIdAndName(StudentInput studentInput){
+    public StudentDto getStudentByIdAndName(StudentInput studentInput) {
         return restTemplateClient.getStudentByIdAndName(studentInput);
     }
 
     //RateLimiter
-    @RateLimiter(name = "studentService",fallbackMethod = "failed")
-    public StudentDto getStudentById(Long id){
+    @RateLimiter(name = "studentService", fallbackMethod = "failed")
+    public StudentDto getStudentById(Long id) {
         return restTemplateClient.getStudentById(id);
     }
 
-    public StudentDto failed(Long id,Throwable t) {
-       //if we use retry we have to handle exception here only not the try catch block in client call
+    public StudentDto failed(Long id, Throwable t) {
+        //if we use retry we have to handle exception here only not the try catch block in client call
         //if the too many req triggered the controller goes to fallback and executed the default student which written below
         //for server side errors also fallback method only triggered and we cannot write like ignore the exception in property file
         //so always handle exception in fallback method only
         System.out.println("fallback method executed");
-        if(t instanceof HttpClientErrorException exception){
+        if (t instanceof HttpClientErrorException exception) {
             throw new CustomStudentException(exception.getResponseBodyAsString());
-        }else if(t instanceof RequestNotPermitted ex){
+        } else if (t instanceof RequestNotPermitted ex) {
             throw ex;
-        }
-        else{
-            StudentDto fallBackStudent=new StudentDto();
+        } else {
+            StudentDto fallBackStudent = new StudentDto();
             fallBackStudent.setName("fallback");
             fallBackStudent.setId(id);
             fallBackStudent.setFees(0);
@@ -57,20 +56,19 @@ public class RestTemplateService {
 
     //Retry testing
     @Retry(name = "studentService", fallbackMethod = "studentRetry")
-    public StudentDto getStudentByName(String name){
+    public StudentDto getStudentByName(String name) {
         System.out.println("retried");
         return restTemplateClient.getStudentByName(name);
     }
 
     //We ignore the HttpClientExceptions and CustomStudentExceptions in the application properties
-    public StudentDto studentRetry(String name, Throwable t){
+    public StudentDto studentRetry(String name, Throwable t) {
         System.out.println(t.getMessage());
         System.out.println("fallback executed");
-        StudentDto fallBackStudent=new StudentDto();
+        StudentDto fallBackStudent = new StudentDto();
         fallBackStudent.setName(name);
         fallBackStudent.setId(0L);
         fallBackStudent.setName("failed");
         return fallBackStudent;
     }
-
 }
