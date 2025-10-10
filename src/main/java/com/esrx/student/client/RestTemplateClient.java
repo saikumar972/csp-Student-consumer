@@ -12,6 +12,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -97,7 +98,11 @@ public class RestTemplateClient {
             return studentResponse.getBody();
         } catch (HttpClientErrorException errorException) {
             throw new CustomStudentException(errorException.getResponseBodyAsString());
-        } catch (Exception e) {
+        } catch (HttpServerErrorException e) {
+            // ✅ 5xx error - RETRY
+            throw e;
+
+        }catch (Exception e) {
             throw new RuntimeException("Backend returned 500: " + e.getMessage());
         }
     }

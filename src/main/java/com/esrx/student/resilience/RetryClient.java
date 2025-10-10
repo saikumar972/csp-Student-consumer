@@ -5,6 +5,7 @@ import com.esrx.student.dto.StudentDto;
 import io.github.resilience4j.retry.Retry;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.function.Supplier;
 
@@ -26,12 +27,16 @@ public class RetryClient {
    }
 
     public StudentDto studentRetry(String name, Throwable t) {
-        System.out.println(t.getMessage());
-        System.out.println("fallback executed");
+        // 🚫 Prevent fallback for 4xx
+        if (t instanceof HttpClientErrorException) {
+            throw (HttpClientErrorException)t; // return same 4xx
+        }
+        // ✅ Only fallback for real server failures
+        System.out.println("Custom Retry fallback executed due to: " + t.getMessage());
         StudentDto fallBackStudent = new StudentDto();
-        fallBackStudent.setName(name);
         fallBackStudent.setId(0L);
-        fallBackStudent.setName("failed");
+        fallBackStudent.setName("fallback-failed");
         return fallBackStudent;
     }
+
 }
