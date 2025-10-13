@@ -12,17 +12,14 @@ import java.time.Duration;
 
 @Configuration
 public class RetryConfiguration {
-    IntervalFunction exponentialRandomBackOff=
-            IntervalFunction.ofExponentialRandomBackoff(
-                    Duration.ofSeconds(2),
-                    2.0,
-                    0.5
-            );
+    private final Duration duration=Duration.ofSeconds(2);
+    IntervalFunction fixedBackOff = IntervalFunction.of(duration);
+
     @Bean(name = "customRetry")
     public Retry customRetry(){
         RetryConfig retryConfig = RetryConfig.custom()
                 .maxAttempts(5)
-                .intervalFunction(exponentialRandomBackOff)
+                .intervalFunction(fixedBackOff)
                 .retryExceptions(
                         HttpServerErrorException.BadGateway.class,
                         HttpServerErrorException.GatewayTimeout.class,
