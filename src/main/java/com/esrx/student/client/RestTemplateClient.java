@@ -4,6 +4,7 @@ import com.esrx.student.ControllerExceptionHandling.CustomStudentException;
 import com.esrx.student.dto.StudentDto;
 import com.esrx.student.dto.StudentInput;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -21,6 +22,7 @@ import java.util.List;
 @Service
 public class RestTemplateClient {
     @Autowired
+    @Qualifier("restTemplate")
     RestTemplate restTemplate;
     @Value("${student.endpoint}")
     private String studentUrl;
@@ -103,6 +105,35 @@ public class RestTemplateClient {
             throw e;
 
         }catch (Exception e) {
+            throw new RuntimeException("Backend returned 500: " + e.getMessage());
+        }
+    }
+
+    //RetryV2
+    public StudentDto getStudentByNameV2(String name) {
+        try {
+            ResponseEntity<StudentDto> studentResponse = restTemplate.exchange(
+                    studentUrl + "/nameV2/" + name,
+                    HttpMethod.GET,
+                    null,
+                    StudentDto.class
+            );
+            return studentResponse.getBody();
+        } catch (HttpClientErrorException errorException) {
+            int status = errorException.getStatusCode().value();
+
+            // ✅ ALLOW retry for 429 & 408
+            if (status == 408 || status == 429) {
+                throw errorException;  // Retry will catch this
+            }
+
+            // ❌ Other 4xx should not retry, return normally
+            throw new CustomStudentException(errorException.getResponseBodyAsString());
+        }
+        catch (HttpServerErrorException e) {
+            throw e; // ✅ 5xx errors already retryable
+        }
+        catch (Exception e) {
             throw new RuntimeException("Backend returned 500: " + e.getMessage());
         }
     }

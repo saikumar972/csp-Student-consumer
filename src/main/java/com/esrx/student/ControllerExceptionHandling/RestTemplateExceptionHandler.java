@@ -5,10 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 
 @RestControllerAdvice
 public class RestTemplateExceptionHandler {
@@ -34,6 +37,25 @@ public class RestTemplateExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.TOO_MANY_REQUESTS)
                 .body("Request got denied because of " + exception.getMessage());
+    }
+
+    //rate limiter
+    @ExceptionHandler(HttpClientErrorException.class)
+    public ResponseEntity<String> clientExceptions(HttpClientErrorException exception) {
+        System.out.println("Exception invoked because for client errors");
+        HttpStatusCode httpStatusCode=exception.getStatusCode();
+        return ResponseEntity
+                .status(httpStatusCode)
+                .body("Request got retried because of " + exception.getMessage());
+    }
+
+    @ExceptionHandler(HttpServerErrorException.class)
+    public ResponseEntity<String> serverExceptions(HttpServerErrorException exception) {
+        System.out.println("Exception invoked because for client errors");
+        HttpStatusCode httpStatusCode=exception.getStatusCode();
+        return ResponseEntity
+                .status(httpStatusCode)
+                .body("Request got circuitBreaker because of " + exception.getMessage());
     }
 
 }
