@@ -19,6 +19,7 @@ public class StudentDto {
     private List<String> subjects;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate joiningDate;
-    private double fees;
+
     private String course;
+    private double fees;
 }

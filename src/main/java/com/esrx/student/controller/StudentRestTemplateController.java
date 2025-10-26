@@ -54,10 +54,17 @@ public class StudentRestTemplateController {
         return ResponseEntity.status(HttpStatus.OK).body(studentDto);
     }
 
-    //Retry
+    //RetryV2
     @GetMapping("/name/retry/{name}")
     public ResponseEntity<StudentDto> getStudentByNameRetry(@PathVariable String name){
         StudentDto studentDto= resilienceClient.getStudentByNameRetry(name);
+        return ResponseEntity.status(HttpStatus.OK).body(studentDto);
+    }
+
+    //RetryV3
+    @GetMapping("/name/retryV2/{name}")
+    public ResponseEntity<StudentDto> getStudentByNameHttp(@PathVariable String name){
+        StudentDto studentDto= restTemplateService.getStudentByNameHttp(name);
         return ResponseEntity.status(HttpStatus.OK).body(studentDto);
     }
 }

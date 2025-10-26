@@ -1,5 +1,6 @@
 package com.esrx.student.ControllerExceptionHandling;
 
+import com.esrx.student.controller.StudentFeignController;
 import com.esrx.student.dto.StudentErrorDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
@@ -9,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice
+@RestControllerAdvice(assignableTypes = {StudentFeignController.class})
 public class FeignExceptionHandling {
     @ExceptionHandler(FeignException.BadRequest.class)
     @SneakyThrows

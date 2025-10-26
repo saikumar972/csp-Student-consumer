@@ -3,6 +3,8 @@ package com.esrx.student.client;
 import com.esrx.student.ControllerExceptionHandling.CustomStudentException;
 import com.esrx.student.dto.StudentDto;
 import com.esrx.student.dto.StudentInput;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +17,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
@@ -26,7 +34,7 @@ public class RestTemplateClient {
     RestTemplate restTemplate;
     @Value("${student.endpoint}")
     private String studentUrl;
-
+    private final static ObjectMapper objectMapper=new ObjectMapper();
     public StudentDto createStudent(StudentDto studentDto) {
         HttpEntity<StudentDto> httpEntity = new HttpEntity<>(studentDto);
         try {
@@ -134,6 +142,40 @@ public class RestTemplateClient {
             throw e; // ✅ 5xx errors already retryable
         }
         catch (Exception e) {
+            throw new RuntimeException("Backend returned 500: " + e.getMessage());
+        }
+    }
+
+    public StudentDto getStudentByNameHttpClient(String name){
+        String url = studentUrl + "/nameV2/" + name;
+        HttpClient httpClient=HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .GET()
+                .build();
+        try {
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            int status = response.statusCode();
+            if (status == 408 || status == 429) {
+                // Allow retry, throw exception to trigger retry logic in caller
+                throw new RuntimeException("Retryable error: " + status);
+            }
+            if (status >= 400 && status < 500) {
+                // Other 4xx, do not retry, throw custom exception
+                throw new CustomStudentException(response.body());
+            }
+            if (status >= 500) {
+                // 5xx errors, allow retry
+                throw new RuntimeException("Server error: " + status);
+            }
+            // Success (2xx)
+            // Parse response.body() as StudentDto using your preferred library (Jackson, Gson, etc.)
+            System.out.println(response);
+            System.out.println(response.body());
+            objectMapper.registerModule(new JavaTimeModule());
+            return objectMapper.readValue(response.body(), StudentDto.class);
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException("Backend returned 500: " + e.getMessage());
         }
     }

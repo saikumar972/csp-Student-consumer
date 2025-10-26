@@ -71,4 +71,9 @@ public class RestTemplateService {
         fallBackStudent.setName("failed");
         return fallBackStudent;
     }
+
+    //HttpClient call
+    public StudentDto getStudentByNameHttp(String name){
+        return null;
+    }
 }
