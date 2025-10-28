@@ -26,7 +26,7 @@ public class HttpClientCall {
     }
 
     @SneakyThrows
-    public StudentDto getStudentByNameHttpClient(String name, Map<String, String> headers) {
+    public Object getStudentByNameHttpClient(String name, Map<String, String> headers) {
         //To do headers validation
         String[] headersArray = headers.entrySet()
                 .stream()
@@ -45,7 +45,7 @@ public class HttpClientCall {
             return studentMapper(httpResponse.body());
         } else if (httpResponse.statusCode() != 200) {
             //return StudentErrorDto(httpResponse.body());
-            return null;
+            return studentErrorMapper(httpResponse.body());
         }
         return null;
     }
